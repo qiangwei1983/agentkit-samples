@@ -185,7 +185,7 @@ def request(
         raise ValueError(f"Error occurred. Bad response: {r}")
 
 
-def ve_request(
+def ve_request_with_aksk(
     request_body: dict,
     action: str,
     ak: str,
@@ -214,6 +214,11 @@ def ve_request(
     Scheme = scheme
     AK = ak
     SK = sk
+    
+    # Check if AK and SK are provided
+    if not (AK and SK):
+        raise ValueError("Access key and secret key are required")
+        
     now = datetime.datetime.utcnow()
     # Body的格式需要配合Content-Type，API使用的类型请阅读具体的官方文档，如:json格式需要json.dumps(obj)
     # response_body = request("GET", now, {"Limit": "2"}, {}, AK, SK, "ListUsers", None)
@@ -236,6 +241,50 @@ def ve_request(
         raise e
 
 
+def ve_request_with_apikey(
+    request_body: dict,
+    api_key: str,
+    content_type: str = "application/json",
+    header: dict = {},
+    method: Literal["GET", "POST", "PUT", "DELETE"] = "POST",
+):
+    # Check if API key is provided
+    if not api_key:
+        raise ValueError("API key is required")
+        
+    now = datetime.datetime.utcnow()
+    # Body的格式需要配合Content-Type，API使用的类型请阅读具体的官方文档，如:json格式需要json.dumps(obj)
+    import json
+
+    try:
+        # Use the provided API Key access URL
+        url = "https://open.feedcoopapi.com/search_api/web_search"
+        
+        # Construct headers
+        headers = {**header}
+        headers["Authorization"] = f"Bearer {api_key}"
+        headers["Content-Type"] = content_type
+        
+        print(f"Request URL: {url}")
+        print(f"Request Headers: {headers}")
+        print(f"Request Body: {json.dumps(request_body)}")
+        
+        # Send request
+        response = requests.request(
+            method=method,
+            url=url,
+            headers=headers,
+            data=json.dumps(request_body),
+        )
+        
+        try:
+            return response.json()
+        except Exception:
+            raise ValueError(f"Error occurred. Bad response: {response}")
+    except Exception as e:
+        raise e
+
+
 def web_search(query: str) -> list[str]:
     """Search a query in websites.
 
@@ -249,53 +298,80 @@ def web_search(query: str) -> list[str]:
         print("Query is empty.")
         return []
 
+    api_key = os.getenv("WEB_SEARCH_API_KEY")
     ak = None
     sk = None
-    ak = os.getenv("TOOL_WEB_SEARCH_ACCESS_KEY")
-    sk = os.getenv("TOOL_WEB_SEARCH_SECRET_KEY")
-    if ak and sk:
-        print("Successfully get tool-specific AK/SK.")
     session_token = ""
 
-    if not (ak and sk):
+    # Use API key if available
+    if not api_key:
+        print("WEB_SEARCH_API_KEY not found in environment variables.")
         ak = os.getenv("VOLCENGINE_ACCESS_KEY")
         sk = os.getenv("VOLCENGINE_SECRET_KEY")
+        if not (ak and sk):
+            print("VOLCENGINE_ACCESS_KEY or VOLCENGINE_SECRET_KEY not found in environment variables.")
+        else:
+            print("Successfully get AK/SK from environment variables.")
+    else:
+        print("Successfully get API key from environment variables.")
 
-    platform = os.getenv("PLATFORM", "ecs")
-    if not (ak and sk):
-        print("Get AK/SK from environment variables failed.")
+    # Use AK/SK if API key is not available
+    if not (ak and sk) and not api_key:
+        platform = os.getenv("PLATFORM", "ecs")
         if platform == "vefaas":
             from veadk.auth.veauth.utils import get_credential_from_vefaas_iam
 
             credential = get_credential_from_vefaas_iam()
-            ak = credential.access_key_id
-            sk = credential.secret_access_key
-            session_token = credential.session_token
+            if credential:
+                ak = credential.access_key_id
+                sk = credential.secret_access_key
+                session_token = credential.session_token
+                if not (ak and sk):
+                    print("Get AK/SK from vefaas credential failed.")
+            else:
+                print("Get credential from vefaas failed.")
         elif platform == "ecs":
             # TODO: Support ecs metadata later.
             print("Support ecs metadata later.")
+
+        if not (ak and sk):
+            print("Get AK/SK from credential failed.")
+        else:
+            print("Successfully get AK/SK from credential.")
+        
+    if not (ak and sk) and not api_key:
+        raise PermissionError("no credential found")
+
+    header = {"X-Security-Token": session_token}
+    # Use API key if available
+    if api_key:
+        response = ve_request_with_apikey(
+            request_body={
+                "Query": query,
+                "SearchType": "web",
+                "Count": 5,
+                "NeedSummary": True,
+            },
+            api_key=api_key,
+            header=header,
+        )
     else:
-        print("Successfully get AK/SK from environment variables.")
-
-    if not ak or not sk:
-        raise PermissionError("AK/SK not found.")
-
-    response = ve_request(
-        request_body={
-            "Query": query,
-            "SearchType": "web",
-            "Count": 5,
-            "NeedSummary": True,
-        },
-        action="WebSearch",
-        ak=ak,
-        sk=sk,
-        service="volc_torchlight_api",
-        version="2025-01-01",
-        region="cn-beijing",
-        host="mercury.volcengineapi.com",
-        header={"X-Security-Token": session_token},
-    )
+        response = ve_request_with_aksk(
+            request_body={
+                "Query": query,
+                "SearchType": "web",
+                "Count": 5,
+                "NeedSummary": True,
+            },
+            action="WebSearch",
+            ak=ak,
+            sk=sk,
+            service="volc_torchlight_api",
+            version="2025-01-01",
+            region="cn-beijing",
+            host="mercury.volcengineapi.com",
+            header=header,
+        )
 
     try:
         results: list = response["Result"]["WebResults"]
