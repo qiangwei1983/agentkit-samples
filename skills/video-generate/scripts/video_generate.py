@@ -8,7 +8,11 @@ from typing import Dict, List, Optional
 
 import httpx
 
-API_KEY = os.getenv("MODEL_VIDEO_API_KEY") or os.getenv("MODEL_AGENT_API_KEY")
+API_KEY = (
+    os.getenv("ARK_API_KEY")
+    or os.getenv("MODEL_VIDEO_API_KEY")
+    or os.getenv("MODEL_AGENT_API_KEY")
+)
 API_BASE = os.getenv(
     "MODEL_VIDEO_API_BASE", "https://ark.cn-beijing.volces.com/api/v3"
 ).rstrip("/")
@@ -460,10 +464,9 @@ def main():
     args = parser.parse_args()
 
     if not API_KEY:
-        print(
-            "Error: MODEL_VIDEO_API_KEY or MODEL_AGENT_API_KEY environment variable is required"
+        raise PermissionError(
+            "ARK_API_KEY or MODEL_VIDEO_API_KEY or MODEL_AGENT_API_KEY not found in environment variables."
         )
-        sys.exit(1)
 
     if args.query_task:
         result = asyncio.run(video_task_query(args.query_task))

@@ -50,7 +50,7 @@ A list of image-generation tasks. Each task is a dict with the following fields:
   - Resolution level: "1K", "2K", "4K"
   - Exact dimensions: "<width>x<height>", e.g., "2048x2048", "2384x1728"
   - Default: "2048x2048"
-  
+
 - `response_format` (str): Return format. "url" (default, URL expires in 24h) or "b64_json"
 - `watermark` (bool): Add watermark. Default: true
 - `image` (str | list[str]): Reference image(s) as URL or Base64
@@ -75,13 +75,32 @@ The model infers the task type from parameters:
 
 ### Return Value
 
+## Script Return Info
+
+The image_generate.py script will return these info:
 ```python
 {
     "status": "success" | "error",
-    "success_list": [{"image_name": "url"}],
+    "success_list": [{"name": "image_name", "url": "image_url", "local_path": "local_path"}],
     "error_list": ["image_name"],
     "error_detail_list": [{"task_idx": 0, "error": {...}}]
 }
+```
+
+Based on the script return info, the final response returned to the user consists of a description of the image generation task and the image URL(s) and local path(s). You may download the image from the URL, but the image URL should still be provided to the user for viewing and downloading.
+
+Note: the URL is the 'url' in the success_list of script return info.
+
+## Final Return Info
+You should return three types of information:
+1. File format, return the image file (if you have some other methods to send the image file) and the local path of the image, for example:
+local_path: /root/.openclaw/workspace/skills/image-generate/xxx.png
+2. URL format, for example:
+URL (https://example.com/image1.png)
+3. Markdown format, for example:
+```
+![picture1](https://example.com/image1.png)
+![picture2](https://example.com/image2.png)
 ```
 
 ## Code Implementation
@@ -135,6 +154,11 @@ If you encounter a model-related error (like `ModelNotOpen`), you can downgrade 
 - `doubao-seedream-5-0-260128`
 - `doubao-seedream-4-5-251128`
 - `doubao-seedream-4-0-250828`
+
+## Error Handling
+
+- IF the script raises the error "PermissionError: ARK_API_KEY or MODEL_IMAGE_API_KEY or MODEL_AGENT_API_KEY not found in environment variables", inform the user that they need to provide the `ARK_API_KEY` or `MODEL_IMAGE_API_KEY` or `MODEL_AGENT_API_KEY` environment variable. Write it to the environment variable file in the workspace. If the file already exists, append it to the end. Ensure the environment variable format is correct, make the environment variable effective, and retry the image generation task that just failed.
+
 
 ## Notes
 

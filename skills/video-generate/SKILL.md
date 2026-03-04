@@ -76,6 +76,10 @@ A list of video generation requests. Each item is a dict with the following fiel
 
 ### Return Value
 
+## Script Return Info
+
+The video_generate.py script will return these info:
+
 ```python
 {
     "status": "success" | "partial_success" | "error",
@@ -84,6 +88,28 @@ A list of video generation requests. Each item is a dict with the following fiel
     "error_details": [{"video_name": "...", "error": {...}}],
     "pending_list": [{"video_name": "...", "task_id": "cgt-xxx", ...}]
 }
+```
+
+Based on the script return info, the final response returned to the user consists of a description of the video generation task and the video URL(s). You may download the video from the URL, but the video URL should still be provided to the user for viewing and downloading.
+
+Note: the URL is the 'url' in the success_list of script return info.
+The URL must return in two ways:
+
+## Final Return Info
+
+You must return three types of information:
+
+1. File format, return both file (if you have some other methods to send the video file) and local path, for example:
+/root/.openclaw/workspace/skills/video-generate/xxx.mp4
+
+2. URL format, for example:
+URL (`https://example.com/video1.mp4`)
+
+3. Markdown format, for example:
+
+```markdown
+<video src="https://example.com/video1.mp4" width="640" controls>视频1</video>
+<video src="https://example.com/video2.mp4" width="640" controls>视频2</video>
 ```
 
 ## Code Implementation
@@ -161,6 +187,10 @@ If you encounter a model-related error (like `ModelNotOpen`), you can downgrade 
 
 - `doubao-seedance-1-5-pro-251215`
 - `doubao-seedance-1-0-pro-250528`
+
+## Error Handling
+
+- IF the script raises the error "PermissionError: ARK_API_KEY or MODEL_VIDEO_API_KEY or MODEL_AGENT_API_KEY not found in environment variables", inform the user that they need to provide the `ARK_API_KEY` or `MODEL_VIDEO_API_KEY` or `MODEL_AGENT_API_KEY` environment variable. Write it to the environment variable file in the workspace. If the file already exists, append it to the end. Ensure the environment variable format is correct, make the environment variable effective, and retry the video generation task that just failed.
 
 ## Notes
 

@@ -2,12 +2,17 @@ import argparse
 import asyncio
 import json
 import os
-import sys
+import time
+import requests
 from typing import Dict
 
 import httpx
 
-API_KEY = os.getenv("MODEL_IMAGE_API_KEY") or os.getenv("MODEL_AGENT_API_KEY")
+API_KEY = (
+    os.getenv("ARK_API_KEY")
+    or os.getenv("MODEL_IMAGE_API_KEY")
+    or os.getenv("MODEL_AGENT_API_KEY")
+)
 API_BASE = os.getenv(
     "MODEL_IMAGE_API_BASE", "https://ark.cn-beijing.volces.com/api/v3"
 ).rstrip("/")
@@ -86,13 +91,44 @@ async def handle_single_task(
                     continue
 
                 image_url = image_data.get("url")
+                local_path = None
                 if image_url:
-                    success_list.append({image_name: image_url})
+                    # Download image from URL
+                    try:
+                        timestamp = int(time.time())
+                        filename = f"image-{timestamp}.jpg"
+                        response = requests.get(image_url)
+                        response.raise_for_status()
+                        with open(filename, "wb") as f:
+                            f.write(response.content)
+                        local_path = os.path.abspath(filename)
+                        print(f"Downloaded image to {local_path}")
+                    except Exception as e:
+                        print(f"Failed to download image: {e}")
+                    success_list.append(
+                        {"name": image_name, "url": image_url, "local_path": local_path}
+                    )
                 else:
                     b64 = image_data.get("b64_json")
                     if b64:
+                        # Save base64 image to file
+                        try:
+                            import base64
+
+                            timestamp = int(time.time())
+                            filename = f"image-{timestamp}.png"
+                            with open(filename, "wb") as f:
+                                f.write(base64.b64decode(b64))
+                            local_path = os.path.abspath(filename)
+                            print(f"Saved image to {local_path}")
+                        except Exception as e:
+                            print(f"Failed to save image: {e}")
                         success_list.append(
-                            {image_name: f"data:image/png;base64,{b64}"}
+                            {
+                                "name": image_name,
+                                "data": f"data:image/png;base64,{b64}",
+                                "local_path": local_path,
+                            }
                         )
                     else:
                         error_list.append(image_name)
@@ -210,10 +246,9 @@ def main():
     args = parser.parse_args()
 
     if not API_KEY:
-        print(
-            "Error: MODEL_IMAGE_API_KEY or MODEL_AGENT_API_KEY environment variable is required"
+        raise PermissionError(
+            "ARK_API_KEY or MODEL_IMAGE_API_KEY or MODEL_AGENT_API_KEY not found in environment variables."
         )
-        sys.exit(1)
 
     task = {
         "prompt": args.prompt,
