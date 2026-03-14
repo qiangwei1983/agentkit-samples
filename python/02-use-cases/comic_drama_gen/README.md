@@ -30,7 +30,7 @@
 步骤1: 读取配置 → 智能时长模式（4s~15s 动态范围）
 步骤2: 初始化任务目录 → 按 COMIC_DRAMA_OUTPUT_DIR 创建独立目录
   ↓ ⚠️ 内容安全预审
-步骤3: 剧本生成 → web-search 调研 + 创作剧本 + 时长分配
+步骤3: 剧本生成 → byted-web-search 调研 + 创作剧本 + 时长分配
 步骤4: 角色设计 → image-generate 生成立绘（并行）
 步骤5: 场景美术 → image-generate 生成分镜图（并行）
 步骤6: 分镜视频 → batch_video.py submit/poll（独立时长）
