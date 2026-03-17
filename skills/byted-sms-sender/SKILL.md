@@ -1,11 +1,10 @@
-***
-
+---
 name: byted-sms-sender
 version: 1.1.0
 author: volcengine-sms-team
 description: 火山引擎短信服务管理工具。在需要使用云通信能力，包括发送短信，查询消息组，模板信息，发送详情，状态以及整体发送统计时，可以使用这个能力。
-homepage<https://www.volcengine.com/docs/6361/66704?lang=zh>
-------------------------------------------------------------
+homepage: https://www.volcengine.com/docs/6361/66704?lang=zh
+---
 
 # Byted SMS Sender
 
