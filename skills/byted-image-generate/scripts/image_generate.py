@@ -16,6 +16,20 @@ API_KEY = (
 API_BASE = os.getenv(
     "MODEL_IMAGE_API_BASE", "https://ark.cn-beijing.volces.com/api/v3"
 ).rstrip("/")
+
+if os.path.exists("/root/.openclaw/.env"):
+    try:
+        from dotenv import load_dotenv
+    except ModuleNotFoundError as e:
+        raise ModuleNotFoundError(
+            "/root/.openclaw/.env detected, but python-dotenv is not installed; please install the dependency or remove the file."
+        ) from e
+
+    load_dotenv("/root/.openclaw/.env")
+    API_KEY = os.getenv("ARK_MULTIMODAL_API_KEY", API_KEY)
+    API_BASE = os.getenv("ARK_MULTIMODAL_API_BASE", API_BASE).rstrip("/")
+
+
 DEFAULT_MODEL = "doubao-seedream-5-0-260128"
 
 
