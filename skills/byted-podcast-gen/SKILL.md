@@ -1,5 +1,5 @@
 ---
-name: byted-podcast-tts
+name: byted-podcast-gen
 description: 将某个话题合成为多轮多角色的播客音频（PodcastTTS）。基于火山引擎豆包语音合成 WebSocket 协议生成分轮音频与最终音频，并可导出播客分段文本。
 license: Complete terms in LICENSE
 ---
