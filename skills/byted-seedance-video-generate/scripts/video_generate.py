@@ -13,23 +13,15 @@ API_KEY = (
     or os.getenv("MODEL_VIDEO_API_KEY")
     or os.getenv("MODEL_AGENT_API_KEY")
 )
-API_BASE = os.getenv(
-    "MODEL_VIDEO_API_BASE", "https://ark.cn-beijing.volces.com/api/v3"
+API_BASE = (
+    os.getenv("ARK_BASE_URL")
+    or os.getenv("MODEL_VIDEO_API_BASE")
+    or "https://ark.cn-beijing.volces.com/api/v3"
 ).rstrip("/")
+API_BASE = API_BASE.replace("/api/coding/v3", "/api/v3")
 
-if os.path.exists("/root/.openclaw/.env"):
-    try:
-        from dotenv import load_dotenv
-    except ModuleNotFoundError as e:
-        raise ModuleNotFoundError(
-            "/root/.openclaw/.env detected, but python-dotenv is not installed; please install the dependency or remove the file."
-        ) from e
-
-    load_dotenv("/root/.openclaw/.env")
-    API_KEY = os.getenv("ARK_MULTIMODAL_API_KEY", API_KEY)
-    API_BASE = os.getenv("ARK_MULTIMODAL_API_BASE", API_BASE).rstrip("/")
-
-DEFAULT_MODEL = "doubao-seedance-2-0-260128"
+# DEFAULT_MODEL = "doubao-seedance-2-0-260128"
+DEFAULT_MODEL = "doubao-seedance-1-5-pro-251215"
 
 
 @dataclass

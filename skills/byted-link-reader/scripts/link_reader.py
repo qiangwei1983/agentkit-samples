@@ -42,6 +42,12 @@ async def link_reader(url_list: list[str]) -> dict:
         return {}
 
     api_key = os.getenv("ARK_API_KEY")
+    api_base = (
+            os.getenv("ARK_BASE_URL")
+            or "https://ark.cn-beijing.volces.com/api/v3"
+    ).rstrip("/")
+    api_base = api_base.replace("/api/coding/v3", "/api/v3")
+
     if not api_key:
         raise PermissionError(
             "ARK_API_KEY or MODEL_AGENT_API_KEY is not set in environment variables."
@@ -50,6 +56,7 @@ async def link_reader(url_list: list[str]) -> dict:
     try:
         client = AsyncArk(
             api_key=api_key,
+            base_url=api_base,
             timeout=Timeout(connect=1.0, timeout=60.0),
         )
     except Exception as e:
