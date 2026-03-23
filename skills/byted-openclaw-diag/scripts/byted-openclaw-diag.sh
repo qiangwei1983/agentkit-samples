@@ -1,15 +1,15 @@
 #!/bin/bash
 # OpenClaw 诊断日志解析工具 v3.2
 # 用法:
-#   ./openclaw-diag.sh              # 解析今天的日志
-#   ./openclaw-diag.sh 2026-03-11   # 解析指定日期
-#   ./openclaw-diag.sh -f           # 实时跟踪模式（标准）
-#   ./openclaw-diag.sh -f --advanced # 实时跟踪模式（高级：自动开启 debug 日志）
-#   ./openclaw-diag.sh -l 5         # 只看最近5个run
-#   ./openclaw-diag.sh -s           # 只看摘要统计
-#   ./openclaw-diag.sh -a myagent 2026-03-19  # 按 agent 过滤
-#   ./openclaw-diag.sh -s -a main   # 指定 agent 的摘要
-#   ./openclaw-diag.sh -f -a myagent # 实时跟踪指定 agent
+#   ./byted-openclaw-diag.sh              # 解析今天的日志
+#   ./byted-openclaw-diag.sh 2026-03-11   # 解析指定日期
+#   ./byted-openclaw-diag.sh -f           # 实时跟踪模式（标准）
+#   ./byted-openclaw-diag.sh -f --advanced # 实时跟踪模式（高级：自动开启 debug 日志）
+#   ./byted-openclaw-diag.sh -l 5         # 只看最近5个run
+#   ./byted-openclaw-diag.sh -s           # 只看摘要统计
+#   ./byted-openclaw-diag.sh -a myagent 2026-03-19  # 按 agent 过滤
+#   ./byted-openclaw-diag.sh -s -a main   # 指定 agent 的摘要
+#   ./byted-openclaw-diag.sh -f -a myagent # 实时跟踪指定 agent
 #
 # 功能:
 #   - 解析 OpenClaw 诊断日志，展示 Run 时间线

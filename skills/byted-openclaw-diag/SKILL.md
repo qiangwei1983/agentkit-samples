@@ -1,5 +1,5 @@
 ---
-name: openclaw-diagnostics
+name: byted-openclaw-diag
 description: >
   OpenClaw 系统诊断和性能分析工具。分析 agent 推理耗时、Token 用量、工具调用统计、
   Run 时间线、Gateway 重启历史。支持多种模式：批量分析（默认）、实时跟踪（-f）、
@@ -56,25 +56,25 @@ metadata:
 
 ```bash
 # 诊断今天的数据
-bash scripts/openclaw-diag.sh
+bash scripts/byted-openclaw-diag.sh
 
 # 诊断指定日期
-bash scripts/openclaw-diag.sh 2026-03-19
+bash scripts/byted-openclaw-diag.sh 2026-03-19
 
 # 只看摘要
-bash scripts/openclaw-diag.sh -s
+bash scripts/byted-openclaw-diag.sh -s
 
 # 实时跟踪（类似 tail -f）
-bash scripts/openclaw-diag.sh -f
+bash scripts/byted-openclaw-diag.sh -f
 
 # 高级实时跟踪（自动开启 debug 日志，退出时恢复）
-bash scripts/openclaw-diag.sh -f --advanced
+bash scripts/byted-openclaw-diag.sh -f --advanced
 
 # 只看指定 agent
-bash scripts/openclaw-diag.sh -a waicode
+bash scripts/byted-openclaw-diag.sh -a waicode
 
 # 最近 5 个 Run
-bash scripts/openclaw-diag.sh -l 5
+bash scripts/byted-openclaw-diag.sh -l 5
 ```
 
 ## 模式说明
@@ -124,26 +124,26 @@ bash scripts/openclaw-diag.sh -l 5
 ### 日常检查
 ```bash
 # 快速了解今天的运行概况
-bash scripts/openclaw-diag.sh -s
+bash scripts/byted-openclaw-diag.sh -s
 ```
 
 ### 性能排查
 ```bash
 # 查看某天详细 Run 数据，找到慢查询
-bash scripts/openclaw-diag.sh 2026-03-19 -l 10
+bash scripts/byted-openclaw-diag.sh 2026-03-19 -l 10
 ```
 
 ### 特定 Agent 分析
 ```bash
 # 只看 waicode 的活动
-bash scripts/openclaw-diag.sh -a waicode -s
+bash scripts/byted-openclaw-diag.sh -a waicode -s
 ```
 
 ### 实时监控（SSH 终端）
 ```bash
 # 需在 SSH 终端运行，不适合 Telegram/聊天
-bash scripts/openclaw-diag.sh -f
-bash scripts/openclaw-diag.sh -f --advanced
+bash scripts/byted-openclaw-diag.sh -f
+bash scripts/byted-openclaw-diag.sh -f --advanced
 ```
 
 ## 注意事项
