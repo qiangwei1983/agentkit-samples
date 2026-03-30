@@ -10,19 +10,23 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 
-def _read_env() -> Tuple[str, str, str]:
+def _read_env() -> Tuple[str, str, Optional[str]]:
     api_host = os.getenv("ARK_SKILL_API_BASE")
     api_key = os.getenv("ARK_SKILL_API_KEY")
     skill_space_id = os.getenv("SKILLHUB_SKILL_SPACE_ID")
-    if not api_host or not api_key or not skill_space_id:
-        raise SystemExit(
-            "缺少必要环境变量: ARK_SKILL_API_BASE, ARK_SKILL_API_KEY, SKILLHUB_SKILL_SPACE_ID"
-        )
-    return api_host.strip(), api_key.strip(), skill_space_id.strip()
+    if not api_host or not api_key:
+        raise SystemExit("缺少必要环境变量: ARK_SKILL_API_BASE, ARK_SKILL_API_KEY")
+    sid = skill_space_id.strip() if skill_space_id else None
+    if not sid:
+        sid = None
+    return api_host.strip(), api_key.strip(), sid
 
 
 def _post_json(
-    url: str, payload: Dict[str, Any], api_key: str
+    url: str,
+    payload: Dict[str, Any],
+    api_key: str,
+    extra_headers: Optional[Dict[str, str]] = None,
 ) -> Tuple[bytes, Dict[str, str]]:
     data = json.dumps(payload).encode("utf-8")
     headers = {
@@ -30,6 +34,8 @@ def _post_json(
         "Authorization": f"Bearer {api_key}",
         "ServiceName": "skillhub",
     }
+    if extra_headers:
+        headers.update(extra_headers)
     req = urllib.request.Request(url, data=data, headers=headers, method="POST")
     with urllib.request.urlopen(req, timeout=30) as resp:
         body = resp.read()
@@ -49,16 +55,16 @@ def _sanitize_name(name: str) -> str:
 
 
 def list_skills(
-    api_host: str, api_key: str, skill_space_id: str, name: str
+    api_host: str, api_key: str, skill_space_id: Optional[str], name: str
 ) -> Dict[str, Any]:
     url = f"{api_host}/ListSkills"
+    filter_obj: Dict[str, Any] = {"Name": name}
+    if skill_space_id:
+        filter_obj["SkillSpaceId"] = skill_space_id
     payload: Dict[str, Any] = {
         "PageNumber": 1,
         "PageSize": 50,
-        "Filter": {
-            "Name": name,
-            "SkillSpaceId": skill_space_id,
-        },
+        "Filter": filter_obj,
     }
     print(f"[DEBUG] 调用 ListSkills: url={url}")
     print(f"[DEBUG] 请求 payload: {json.dumps(payload, ensure_ascii=False)}")
@@ -139,12 +145,17 @@ def download_skill(
     api_host: str, api_key: str, skill_id: str, version_id: Optional[str]
 ) -> Tuple[bytes, Dict[str, str]]:
     url = f"{api_host}/DownloadSkill"
-    payload: Dict[str, Any] = {"SkillId": skill_id}
+    payload: Dict[str, Any] = {"SkillId": skill_id, "IsPreview": False}
     if version_id:
         payload["SkillVersionId"] = version_id
     print(f"[DEBUG] 调用 DownloadSkill: url={url}")
     print(f"[DEBUG] 请求 payload: {json.dumps(payload, ensure_ascii=False)}")
-    body, headers = _post_json(url, payload, api_key)
+    body, headers = _post_json(
+        url,
+        payload,
+        api_key,
+        extra_headers={"X-Skill-Caller": "arkclaw-business"},
+    )
     print(f"[DEBUG] 响应头: {headers}")
     print(f"[DEBUG] 响应体长度: {len(body)} 字节")
     ctype = (headers.get("Content-Type") or "").lower()
