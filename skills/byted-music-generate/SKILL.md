@@ -6,7 +6,7 @@ license: Complete terms in LICENSE
 
 # Music Generate Skill
 
-This skill generates music using the [Volcengine Music Generation API](https://www.volcengine.com/docs/84992). It supports vocal songs, instrumental BGM, and AI lyrics generation.
+Generate music using the [Volcengine Music Generation API](https://www.volcengine.com/docs/84992). Supports vocal songs, instrumental BGM, and AI lyrics generation.
 
 ## Trigger Conditions
 
@@ -17,12 +17,16 @@ This skill generates music using the [Volcengine Music Generation API](https://w
 
 ## Environment Variables
 
-Before using this skill, ensure the following environment variables are set:
+Two authentication methods are supported (gateway takes priority):
 
+**Option 1: API Gateway (recommended)**
+- `ARK_SKILL_API_BASE` — API gateway base URL
+- `ARK_SKILL_API_KEY` — API gateway authentication key
+
+**Option 2: Direct AK/SK**
 - `VOLCENGINE_ACCESS_KEY` — AccessKey ID
 - `VOLCENGINE_SECRET_KEY` — AccessKey Secret
-
-How to obtain: [Volcengine Console](https://console.volcengine.com/) → Account (top-right) → Key Management → Create Key.
+- How to obtain: [Volcengine Console](https://console.volcengine.com/) → Account → Key Management → Create Key
 
 ## Usage
 
@@ -91,47 +95,47 @@ Contains "instrumental/BGM/background music/soundtrack"?
 
 ### song mode
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `--lyrics` | either | Lyrics with structure tags |
-| `--prompt` | either | Text prompt (Chinese, 5-700 chars) |
-| `--model-version` | no | `v4.0` or `v4.3` (default: v4.3) |
-| `--genre` | no | Music genre |
-| `--mood` | no | Music mood |
-| `--gender` | no | `Female` / `Male` |
-| `--timbre` | no | Vocal timbre |
-| `--duration` | no | Duration in seconds [30-240] |
-| `--key` | no | Musical key (v4.3 only) |
-| `--kmode` | no | `Major` / `Minor` (v4.3 only) |
-| `--tempo` | no | Tempo (v4.3 only) |
-| `--instrument` | no | Instruments, comma-separated (v4.3 only) |
-| `--genre-extra` | no | Secondary genres, comma-separated, max 2 (v4.3 only) |
-| `--scene` | no | Scene tags, comma-separated (v4.3 only) |
-| `--lang` | no | Language (v4.3 only) |
-| `--vod-format` | no | `wav` / `mp3` (v4.3 only) |
-| `--billing` | no | `prepaid` / `postpaid` (default: postpaid) |
-| `--timeout` | no | Max wait seconds (default: 300) |
+| Parameter         | Required | Description                                          |
+|-------------------|----------|------------------------------------------------------|
+| `--lyrics`        | either   | Lyrics with structure tags                           |
+| `--prompt`        | either   | Text prompt (Chinese, 5-700 chars)                   |
+| `--model-version` | no       | `v4.0` or `v4.3` (default: v4.3)                    |
+| `--genre`         | no       | Music genre                                          |
+| `--mood`          | no       | Music mood                                           |
+| `--gender`        | no       | `Female` / `Male`                                    |
+| `--timbre`        | no       | Vocal timbre                                         |
+| `--duration`      | no       | Duration in seconds [30-240]                         |
+| `--key`           | no       | Musical key (v4.3 only)                              |
+| `--kmode`         | no       | `Major` / `Minor` (v4.3 only)                        |
+| `--tempo`         | no       | Tempo (v4.3 only)                                    |
+| `--instrument`    | no       | Instruments, comma-separated (v4.3 only)             |
+| `--genre-extra`   | no       | Secondary genres, comma-separated, max 2 (v4.3 only) |
+| `--scene`         | no       | Scene tags, comma-separated (v4.3 only)              |
+| `--lang`          | no       | Language (v4.3 only)                                 |
+| `--vod-format`    | no       | `wav` / `mp3` (v4.3 only)                            |
+| `--billing`       | no       | `prepaid` / `postpaid` (default: postpaid)           |
+| `--timeout`       | no       | Max wait seconds (default: 300)                      |
 
 ### bgm mode
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `--text` | yes | Natural language description |
-| `--duration` | no | Duration in seconds [30-120] |
-| `--segments` | no | JSON array of song structure segments |
-| `--version` | no | Model version (default: v5.0) |
-| `--enable-input-rewrite` | no | Enable prompt rewriting |
-| `--billing` | no | `prepaid` / `postpaid` (default: postpaid) |
-| `--timeout` | no | Max wait seconds (default: 300) |
+| Parameter                | Required | Description                            |
+|--------------------------|----------|----------------------------------------|
+| `--text`                 | yes      | Natural language description           |
+| `--duration`             | no       | Duration in seconds [30-120]           |
+| `--segments`             | no       | JSON array of song structure segments  |
+| `--version`              | no       | Model version (default: v5.0)          |
+| `--enable-input-rewrite` | no       | Enable prompt rewriting                |
+| `--billing`              | no       | `prepaid` / `postpaid` (default: postpaid) |
+| `--timeout`              | no       | Max wait seconds (default: 300)        |
 
 ### lyrics mode
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `--prompt` | yes | Lyrics prompt (Chinese only, <500 chars) |
-| `--genre` | no | Music genre |
-| `--mood` | no | Music mood |
-| `--gender` | no | `Female` / `Male` |
+| Parameter | Required | Description                              |
+|-----------|----------|------------------------------------------|
+| `--prompt` | yes     | Lyrics prompt (Chinese only, <500 chars) |
+| `--genre`  | no      | Music genre                              |
+| `--mood`   | no      | Music mood                               |
+| `--gender` | no      | `Female` / `Male`                        |
 
 ## Script Return Info
 
@@ -153,9 +157,9 @@ Return the `audio_url` to the user for download or playback. URLs are valid for 
 
 ## Error Handling
 
-- `PermissionError: VOLCENGINE_ACCESS_KEY ...`: Inform the user to configure the environment variables. Write them to the workspace environment variable file, then retry.
-- `status: "timeout"`: The task is still generating. Provide the user with the `task_id` and the manual query command from the output.
-- Copyright check failure (code 50000001): Suggest the user enrich the description or increase the audio duration, then retry.
+- IF the script raises `PermissionError: Authentication not configured ...`, inform the user to configure either API gateway (`ARK_SKILL_API_BASE` + `ARK_SKILL_API_KEY`) or direct AK/SK (`VOLCENGINE_ACCESS_KEY` + `VOLCENGINE_SECRET_KEY`) environment variables. Write them to the workspace environment variable file, then retry.
+- IF `status` is `"timeout"`, the task is still generating. Provide the user with the `task_id` and the manual query command from the output.
+- IF copyright check fails (code 50000001), suggest the user enrich the description or increase the audio duration, then retry.
 
 ## References
 

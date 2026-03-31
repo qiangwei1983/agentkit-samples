@@ -16,7 +16,7 @@
 Music generation using Volcengine Imagination API.
 Supports: vocal songs (GenSong), instrumental BGM (GenBGM), lyrics (GenLyrics).
 Ref: https://www.volcengine.com/docs/84992
-Auth: HMAC-SHA256 signature with AK/SK.
+Auth: API gateway (Bearer token) or direct AK/SK (HMAC-SHA256).
 """
 
 from __future__ import annotations
@@ -35,7 +35,6 @@ from typing import Any, Dict, Optional
 import requests
 
 API_HOST = "open.volcengineapi.com"
-API_BASE = f"https://{API_HOST}"
 API_VERSION = "2024-08-12"
 REGION = "cn-beijing"
 SERVICE = "imagination"
@@ -47,14 +46,52 @@ TASK_STATUS_FAILED = 3
 
 
 class VolcEngineApiClient:
-    """Volcengine API client with HMAC-SHA256 signature authentication."""
+    """Volcengine API client supporting API gateway (Bearer) and direct AK/SK (HMAC-SHA256)."""
 
-    def __init__(self, ak: str, sk: str):
-        self.ak = ak
-        self.sk = sk
+    def __init__(
+        self,
+        *,
+        api_base: str = "",
+        api_key: str = "",
+        ak: str = "",
+        sk: str = "",
+    ):
+        if api_base and api_key:
+            self._mode = "gateway"
+            self._api_base = api_base.rstrip("/")
+            self._api_key = api_key
+        elif ak and sk:
+            self._mode = "aksk"
+            self._api_base = f"https://{API_HOST}"
+            self._ak = ak
+            self._sk = sk
+        else:
+            raise ValueError("Either (api_base, api_key) or (ak, sk) must be provided")
 
     def request(self, action: str, body: dict, method: str = "POST") -> dict:
-        url = f"{API_BASE}/?Action={action}&Version={API_VERSION}"
+        url = f"{self._api_base}/?Action={action}&Version={API_VERSION}"
+
+        if self._mode == "gateway":
+            return self._request_gateway(url, body, method)
+        return self._request_aksk(url, action, body, method)
+
+    def _request_gateway(self, url: str, body: dict, method: str) -> dict:
+        headers = {
+            "Content-Type": "application/json; charset=utf-8",
+            "Authorization": f"Bearer {self._api_key}",
+            "ServiceName": SERVICE,
+        }
+
+        if method == "GET":
+            resp = requests.get(url, headers=headers, timeout=30)
+        else:
+            resp = requests.post(url, headers=headers, json=body, timeout=30)
+
+        if resp.status_code != 200:
+            raise RuntimeError(f"HTTP {resp.status_code}: {resp.text}")
+        return resp.json()
+
+    def _request_aksk(self, url: str, action: str, body: dict, method: str) -> dict:
         json_body = "" if method == "GET" else json.dumps(body, ensure_ascii=False)
         ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         body_hash = hashlib.sha256(json_body.encode()).hexdigest()
@@ -86,7 +123,7 @@ class VolcEngineApiClient:
         signing_key = reduce(
             lambda key, msg: hmac.new(key, msg.encode(), hashlib.sha256).digest(),
             [ts[:8], REGION, SERVICE, "request"],
-            self.sk.encode(),
+            self._sk.encode(),
         )
         signature = hmac.new(
             signing_key, string_to_sign.encode(), hashlib.sha256
@@ -97,7 +134,7 @@ class VolcEngineApiClient:
             for k, v in headers_to_sign.items()
         }
         req_headers["Authorization"] = (
-            f"HMAC-SHA256 Credential={self.ak}/{credential_scope}, "
+            f"HMAC-SHA256 Credential={self._ak}/{credential_scope}, "
             f"SignedHeaders={signed_headers}, Signature={signature}"
         )
 
@@ -114,14 +151,21 @@ class VolcEngineApiClient:
 
 
 def _get_client() -> VolcEngineApiClient:
+    api_base = os.getenv("ARK_SKILL_API_BASE", "").strip()
+    api_key = os.getenv("ARK_SKILL_API_KEY", "").strip()
+    if api_base and api_key:
+        return VolcEngineApiClient(api_base=api_base, api_key=api_key)
+
     ak = os.getenv("VOLCENGINE_ACCESS_KEY", "").strip()
     sk = os.getenv("VOLCENGINE_SECRET_KEY", "").strip()
-    if not ak or not sk:
-        raise PermissionError(
-            "VOLCENGINE_ACCESS_KEY and VOLCENGINE_SECRET_KEY must be set in environment variables. "
-            "Obtain from: Volcengine Console → Account → Key Management → Create Key"
-        )
-    return VolcEngineApiClient(ak, sk)
+    if ak and sk:
+        return VolcEngineApiClient(ak=ak, sk=sk)
+
+    raise PermissionError(
+        "Authentication not configured. Set either:\n"
+        "  - ARK_SKILL_API_BASE + ARK_SKILL_API_KEY (API gateway), or\n"
+        "  - VOLCENGINE_ACCESS_KEY + VOLCENGINE_SECRET_KEY (direct AK/SK)"
+    )
 
 
 def _get_song_action(mode: str, billing: str) -> str:
