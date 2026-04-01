@@ -42,7 +42,7 @@
 ## 使用示例
 
 ```python
-from scripts.multi_source_analyzer import MultiSourceAnalyzer
+from multi_source_analyzer import MultiSourceAnalyzer
 
 analyzer = MultiSourceAnalyzer()
 

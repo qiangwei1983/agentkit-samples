@@ -13,7 +13,7 @@ body {
   width: 1200px; height: 700px; background: #F5E6D3;
   padding: 30px; font-family: "PingFang SC", Arial, sans-serif;
 }
-: 24px.title { font-size; font-weight: 800; color: #1A1A1A; margin-bottom: 20px; }
+.title { font-size: 24px; font-weight: 800; color: #1A1A1A; margin-bottom: 20px; }
 .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
 .tab {
   padding: 12px 24px; background: #FFFDF7; border: 3px solid #1A1A1A;

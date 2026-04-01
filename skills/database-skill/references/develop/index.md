@@ -10,31 +10,31 @@ description: "开发测试：执行DML/DDL数据变更、表结构变更，涉�
 ## 依赖文件
 
 - `scripts/dbw_client.py`: HTTP 直连实现，仅依赖 Python 标准库
-- `scripts/toolbox.py`: 封装 `DatabaseToolbox` 类
+- `scripts/toolbox.py`: 封装 `create_client` 等函数
 
 ## 初始化工具箱
 
 ```python
-from scripts.toolbox import DatabaseToolbox
-toolbox = DatabaseToolbox()
+from toolbox import create_client
+client = create_client()
 ```
 
 ## 可用方法
 
 ### 1. 直接执行 SQL（可能被拦截）
 ```python
-toolbox.execute_sql(commands="UPDATE users SET status=1 WHERE id=100")
+execute_sql(client, sql="UPDATE users SET status=1 WHERE id=100")
 ```
 - **返回**: `{"success": true, "data": {"state": "success", "row_count": N}}`
 - **注意**: 如果被安全规则拦截，会返回错误，此时需要创建工单
 
 ### 2. 创建 DML 工单（数据变更）
 > 📖 **指南**:
-> - [MySQL DML 指南](databases/mysql/dml-guide.md)
-> - [PostgreSQL DML 指南](databases/postgresql/dml-guide.md)
+> - [MySQL DML 指南](mysql/dml-guide.md)
+> - [PostgreSQL DML 指南](postgresql/dml-guide.md)
 
 ```python
-toolbox.create_dml_sql_change_ticket(
+create_dml_sql_change_ticket(client,
     sql_text="UPDATE users SET status=1 WHERE id=100",
     title="更新用户状态",
     memo="测试数据更新"
@@ -44,11 +44,11 @@ toolbox.create_dml_sql_change_ticket(
 
 ### 3. 创建 DDL 工单（结构变更）
 > 📖 **指南**:
-> - [MySQL DDL 指南](databases/mysql/ddl-guide.md)
-> - [PostgreSQL DDL 指南](databases/postgresql/ddl-guide.md)
+> - [MySQL DDL 指南](mysql/ddl-guide.md)
+> - [PostgreSQL DDL 指南](postgresql/ddl-guide.md)
 
 ```python
-toolbox.create_ddl_sql_change_ticket(
+create_ddl_sql_change_ticket(client,
     sql_text="ALTER TABLE users ADD COLUMN email VARCHAR(100)",
     title="添加邮箱字段"
 )
@@ -57,19 +57,19 @@ toolbox.create_ddl_sql_change_ticket(
 
 ### 4. 查询工单列表
 ```python
-toolbox.describe_tickets(list_type="CreatedByMe")
+describe_tickets(client, list_type="CreatedByMe")
 ```
 - **返回**: `{"success": true, "data": {"tickets": [...]}}`
 
 ### 5. 查询工单详情
 ```python
-toolbox.describe_ticket_detail(ticket_id="ticket_xxx")
+describe_ticket_detail(client, ticket_id="ticket_xxx")
 ```
 - **返回**: `{"success": true, "data": {"status": "...", "result": "..."}}`
 
 ### 6. 查询审批流程
 ```python
-toolbox.describe_workflow(ticket_id="ticket_xxx")
+describe_workflow(client, ticket_id="ticket_xxx")
 ```
 - **返回**: `{"success": true, "data": {"nodes": [...]}}`
 

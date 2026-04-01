@@ -21,14 +21,14 @@ description: "全域资产盘点：自动化扫描和登记数据库实例、库
 首先获取云账号下所有的数据库实例信息。
 
 ```python
-from scripts.toolbox import DatabaseToolbox
-toolbox = DatabaseToolbox()
+from toolbox import create_client
+client = create_client()
 
 # 获取所有实例（支持分页）
 instances = []
 page = 1
 while True:
-    res = toolbox.list_instances(page_number=page, page_size=50)
+    res = list_instances(client, page_number=page, page_size=50)
     if not res['success']:
         break
     data = res['data'].get('instances', [])
@@ -59,7 +59,7 @@ for inst in instances:
     print(f"正在扫描实例: {inst['name']} ({inst['id']})")
     
     # 获取该实例下的数据库
-    db_res = toolbox.list_databases(instance_id=inst['id'], page_size=100)
+    db_res = list_databases(client, instance_id=inst['id'], page_size=100)
     if db_res['success']:
         dbs = db_res['data'].get('databases', [])
         print(f"  - 发现 {len(dbs)} 个数据库")
@@ -78,7 +78,7 @@ for inst in instances:
 ```python
 # 伪代码示例
 for db in dbs:
-    table_res = toolbox.list_tables(
+    table_res = list_tables(client,
         instance_id=inst['id'], 
         database=db['name'],
         page_size=100

@@ -30,14 +30,13 @@ description: "数据探查：自动化分析数据分布、统计特征、空值
 针对单张表，生成全字段的探查报告。
 
 ```python
-from scripts.toolbox import DatabaseToolbox
+from toolbox import create_client
 import pandas as pd
 
-toolbox = DatabaseToolbox()
-
+client = create_client()
 def profile_table(instance_id, db, table):
     # 1. 获取表结构
-    schema = toolbox.get_table_info(instance_id=instance_id, database=db, table=table)
+    schema = get_table_info(client, instance_id=instance_id, database=db, table=table)
     if not schema['success']:
         return
         
@@ -64,7 +63,7 @@ def profile_table(instance_id, db, table):
     sql = f"SELECT {', '.join(selects)} FROM {table}"
     
     # 3. 执行查询
-    res = toolbox.execute_sql(commands=sql, instance_id=instance_id, database=db)
+    res = execute_sql(client, sql=sql, instance_id=instance_id, database=db)
     if res['success']:
         return res['data']['rows'][0]
 ```
@@ -83,7 +82,7 @@ GROUP BY city
 ORDER BY cnt DESC
 LIMIT 20
 """
-res = toolbox.execute_sql(commands=sql, instance_id="inst-xxx", database="user_db")
+res = execute_sql(client, sql=sql, instance_id="inst-xxx", database="user_db")
 ```
 
 ## 探查报告应用

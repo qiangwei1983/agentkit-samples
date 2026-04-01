@@ -53,12 +53,11 @@ dq_tasks = [
 使用 `execute_sql` 批量执行，仅获取统计结果。
 
 ```python
-from scripts.toolbox import DatabaseToolbox
+from toolbox import create_client
 import pandas as pd
 from datetime import datetime
 
-toolbox = DatabaseToolbox()
-
+client = create_client()
 def execute_dq_checks(instance_id, db, tasks):
     results = []
     
@@ -67,12 +66,12 @@ def execute_dq_checks(instance_id, db, tasks):
         print(f"正在检查表: {table}...")
         
         # 获取总行数，用于计算错误率
-        count_res = toolbox.execute_sql(f"SELECT COUNT(*) as cnt FROM {table}", instance_id, db)
-        total_rows = count_res['data']['rows'][0].values()[0] if count_res['success'] else 0
+        count_res = execute_sql(client, sql=f"SELECT COUNT(*) as cnt FROM {table}", instance_id=instance_id, database=db)
+        total_rows = list(count_res['data']['rows'][0].values())[0] if count_res['success'] else 0
         
         for check in task['checks']:
             # 执行校验 SQL
-            res = toolbox.execute_sql(check['sql'], instance_id, db)
+            res = execute_sql(client, sql=check['sql'], instance_id=instance_id, database=db)
             
             error_count = 0
             if res['success'] and res['data']['rows']:

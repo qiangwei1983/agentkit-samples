@@ -6,7 +6,7 @@ Uses DuckDB as the local analysis engine.
 
 Usage:
     # Python API
-    from scripts.multi_source_analyzer import MultiSourceAnalyzer
+    from multi_source_analyzer import MultiSourceAnalyzer
     analyzer = MultiSourceAnalyzer()
     analyzer.register_file('sales', 'data/sales.csv')
     result = analyzer.query("SELECT * FROM sales")

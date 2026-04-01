@@ -49,11 +49,11 @@ description: "库表规范性审计：自动化检查数据库表结构设计规
 使用 `get_table_info` API 获取表的详细定义。
 
 ```python
-from scripts.toolbox import DatabaseToolbox
-toolbox = DatabaseToolbox()
+from toolbox import create_client
+client = create_client()
 
 # 示例：获取表结构
-res = toolbox.get_table_info(
+res = get_table_info(client,
     instance_id="inst-xxx",
     database="order_db",
     table="t_order_main"
