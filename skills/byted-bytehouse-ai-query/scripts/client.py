@@ -54,8 +54,8 @@ def create_client(
     """
     # 从环境变量读取
     host = host or os.environ.get('BYTEHOUSE_HOST', '')
-    port = port or os.environ.get('BYTEHOUSE_PORT', '')
-    user = user or os.environ.get('BYTEHOUSE_USER', '')
+    port = port or os.environ.get('BYTEHOUSE_PORT', '8123')
+    user = user or os.environ.get('BYTEHOUSE_USER', 'bytehouse')
     password = password or os.environ.get('BYTEHOUSE_PASSWORD', '')
     database = database or os.environ.get('BYTEHOUSE_DATABASE', '')
     
