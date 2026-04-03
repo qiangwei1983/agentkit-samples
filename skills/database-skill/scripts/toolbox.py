@@ -16,7 +16,7 @@ import sys
 import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from typing import Any, Optional, List, Union
+from typing import Any, Literal, Optional, List, Union
 
 from dbw_client import DBWClient
 
@@ -756,7 +756,7 @@ def get_table_info(
         if not p["database"]:
             return _error("缺少 database 参数", {"missing": ["database"]}, context=ctx)
 
-        # PostgreSQL 不支持 GetTableInfo API，走 SQL fallback
+        # Postgres 不支持 GetTableInfo API，走 SQL fallback
         if p["instance_type"] == "Postgres" or p["instance_id"].startswith("External-Postgres"):
             return _pg_get_table_info(client, table, p["instance_id"], p["database"], schema, ctx)
 
@@ -804,7 +804,7 @@ def _pg_get_table_info(
     schema: Optional[str],
     ctx: dict,
 ) -> dict[str, Any]:
-    """PostgreSQL 通过 information_schema 查询表结构。"""
+    """Postgres 通过 information_schema 查询表结构。"""
     schema = schema or "public"
     sql = (
         f"SELECT column_name, data_type, character_maximum_length, "
@@ -840,7 +840,7 @@ def _pg_get_table_info(
 
 def list_instances(
     client: ToolboxClient,
-    ds_type: Optional[str] = None,
+    ds_type: Optional[Literal["MySQL", "Postgres", "Mongo", "Redis", "MSSQL", "VeDBMySQL", "External"]] = None,
     region_id: Optional[str] = None,
     instance_name: Optional[str] = None,
     instance_id: Optional[str] = None,

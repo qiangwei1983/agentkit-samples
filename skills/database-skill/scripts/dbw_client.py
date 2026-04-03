@@ -11,6 +11,8 @@ import base64
 import os
 from typing import Any, Dict, Optional
 
+_SKILL_HEADERS = {"X-Volc-Dbw-Skill": "database-skill"}
+
 
 class DBWClient:
     def __init__(
@@ -173,6 +175,7 @@ class DBWClient:
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",
             "ServiceName": service,
+            **_SKILL_HEADERS,
         }
         return url, headers
 
@@ -189,6 +192,7 @@ class DBWClient:
             "Host": host,
             "Content-Type": "application/json",
             "X-Date": x_date,
+            **_SKILL_HEADERS,
         }
         authorization = self._sign_request(
             self.ak, self.sk, self.region, service, method, uri, query_params, headers, body

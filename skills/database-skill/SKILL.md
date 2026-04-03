@@ -137,7 +137,7 @@ info = get_table_info(client, table="users", instance_id="xxx", database="mydb")
 
 | 函数 | 说明 | 支持范围 |
 | :--- | :--- | :--- |
-| `list_instances(client, instance_id=, query=, ds_type=, ...)` | 查询实例列表（须传过滤项） | 全部 |
+| `list_instances(client, instance_id=, query=, ds_type=, ...)` | 查询实例列表（须传过滤项）。`ds_type` 枚举：MySQL / Postgres / Mongo / Redis / MSSQL / VeDBMySQL / External | 全部 |
 | `list_databases(client, instance_id=)` | 列出数据库 | MySQL / VeDB / PG / SQLServer / Mongo / External |
 | `list_tables(client, instance_id=, database=, fetch_all=True)` | 列出表（`fetch_all=True` 获取全部） | MySQL / VeDB / PG / SQLServer / Mongo / External |
 | `get_table_info(client, table, instance_id=, database=)` | 获取表结构 | MySQL / VeDB / PG / SQLServer / External |
@@ -204,7 +204,7 @@ info = get_table_info(client, table="users", instance_id="xxx", database="mydb")
 
 | 类型 | 注意事项 |
 | :--- | :--- |
-| PostgreSQL | `schema` 参数必传：`list_tables`/`get_table_info` 通过 `schema` 指定；SQL 需用 `<schema>.<table>` 写法 |
+| Postgres | `schema` 参数必传：`list_tables`/`get_table_info` 通过 `schema` 指定；SQL 需用 `<schema>.<table>` 写法 |
 | MongoDB | `execute_sql` 使用 Mongo 语法；`list_databases`/`list_tables` 返回 Items 可能为 null（DBW bug）；无固定 schema，不支持 `get_table_info` |
 | Redis | `execute_sql` 使用 Redis 命令；`database` 须传数字 0-15；无库表概念 |
 | External | `instance_id` 以 `External-` 开头，DBW 代理连接。**禁止**要求用户提供 endpoint/用户名/密码。仅支持元数据、查询、工单 |

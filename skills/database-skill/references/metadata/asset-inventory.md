@@ -43,7 +43,7 @@ print(f"共发现 {len(instances)} 个数据库实例")
 **关注指标**：
 -   实例 ID (`instance_id`)
 -   实例名称 (`instance_name`)
--   实例类型 (`instance_type`): MySQL, PostgreSQL, Redis 等
+-   实例类型 (`instance_type`): MySQL, Postgres, Redis 等
 -   运行状态 (`status`): Running, Stopped 等
 -   地域信息 (`region`)
 

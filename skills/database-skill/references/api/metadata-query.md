@@ -7,7 +7,7 @@ description: "元数据探查与数据查询函数的参数、返回格式、数
 
 ## 数据库类型兼容性
 
-| 函数 | MySQL | VeDB-MySQL | PostgreSQL | SQL Server | MongoDB | Redis |
+| 函数 | MySQL | VeDB-MySQL | Postgres | SQL Server | MongoDB | Redis |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|
 | `list_instances` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `list_databases` | ✓ | ✓ | ✓ | ✓ | ⚠️ 仅总数 | ✗ |
@@ -38,7 +38,7 @@ list_instances(client,
     instance_id=None,     # str: 按实例 ID 搜索
     query=None,           # str: 模糊搜索（不确定是 ID 还是名称时用这个）
     instance_name=None,   # str: 按实例名称搜索
-    ds_type=None,         # str: 数据库类型过滤（如 "MySQL"、"PostgreSQL"）
+    ds_type=None,         # str: MySQL | Postgres | Mongo | Redis | MSSQL | VeDBMySQL | External
     region_id=None,       # str: 地域过滤
     instance_status=None, # str: 状态过滤
     page_number=1,        # int
@@ -77,7 +77,7 @@ list_databases(client,
 list_tables(client,
     instance_id=None,    # str
     database=None,       # str
-    schema=None,         # str: PostgreSQL 必传（默认查 public）
+    schema=None,         # str: Postgres 必传（默认查 public）
     page_number=1,       # int
     page_size=10,        # int
     fetch_all=False,     # bool: True 时自动翻页获取全部表
@@ -89,7 +89,7 @@ list_tables(client,
 - `tables[]`: 表/集合列表
 
 **数据库差异**：
-- **PostgreSQL**: 必须通过 `schema` 参数指定 schema，不传默认查 `public`
+- **Postgres**: 必须通过 `schema` 参数指定 schema，不传默认查 `public`
 - **MongoDB**: 返回的是集合（collection）列表
 - **Redis**: 不支持
 
@@ -102,7 +102,7 @@ get_table_info(client,
     table="表名",        # str: 必传
     instance_id=None,    # str
     database=None,       # str
-    schema=None,         # str: PostgreSQL 需要
+    schema=None,         # str: Postgres 需要
 )
 ```
 
@@ -111,7 +111,7 @@ get_table_info(client,
 - `columns[]`: `name`, `type`, `length`, `nullable`, `primary_key`, `auto_increment`, `default`, `comment`
 
 **数据库差异**：
-- **PostgreSQL**: 自动使用 SQL 回退（查 `information_schema.columns`），无法获取主键和自增信息
+- **Postgres**: 自动使用 SQL 回退（查 `information_schema.columns`），无法获取主键和自增信息
 - **MongoDB**: 不支持（无固定 schema）
 - **Redis**: 不支持
 
@@ -158,7 +158,7 @@ execute_sql(client,
 - INSERT / UPDATE / DELETE / DDL 会被拦截，必须走工单
 
 **数据库差异**：
-- **PostgreSQL**: SQL 中表名需用 `schema.table` 写法（如 `public.users`）
+- **Postgres**: SQL 中表名需用 `schema.table` 写法（如 `public.users`）
 - **MongoDB**: 使用 Mongo 语法（如 `db.getCollectionNames()`、`db.collection.find({})`）
 - **Redis**: 使用 Redis 命令（如 `INFO server`、`GET key`），`database` 参数须传数字（0-15）
 
